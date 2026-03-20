@@ -12,6 +12,12 @@ keywords:
   - umbrella
 
 dependencies:
+  - name: carbide-rest-common
+    version: "0.1.0"
+    condition: carbide-rest-common.enabled
+  - name: carbide-rest-cert-manager
+    version: "0.1.0"
+    condition: carbide-rest-cert-manager.enabled
   - name: carbide-rest-api
     version: "0.1.0"
     condition: carbide-rest-api.enabled

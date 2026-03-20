@@ -360,8 +360,10 @@ deploy-overlay-workflow:
 # =============================================================================
 
 # Shared infrastructure: cluster, cert-manager.io, PostgreSQL, Temporal, Keycloak,
-# common secrets, credsmgr, and mock-core (dev only).
-# App services are deployed separately by kind-reset-helm or kind-reset-kustomize.
+# and mock-core (dev only).
+# common secrets and credsmgr are now installed as part of the Helm chart (carbide-rest-common,
+# carbide-rest-cert-manager sub-charts). App services are deployed separately by
+# kind-reset-helm or kind-reset-kustomize.
 kind-reset-infra: docker-build-local
 	-kind delete cluster --name $(KIND_CLUSTER_NAME)
 	kind create cluster --name $(KIND_CLUSTER_NAME) --config deploy/kind/cluster-config.yaml
@@ -423,14 +425,6 @@ kind-reset-infra: docker-build-local
 	@echo "Setting up Keycloak..."
 	kubectl apply -k deploy/kustomize/base/keycloak
 	kubectl -n carbide-rest rollout status deployment/keycloak --timeout=240s
-
-	@echo "Setting up common secrets..."
-	kubectl apply -k deploy/kustomize/base/common
-	kubectl -n carbide-rest wait --for=condition=Ready certificate/temporal-client-cloud-cert --timeout=240s || true
-
-	@echo "Setting up Carbide REST Cert Manager (credsmgr)..."
-	kubectl apply -k deploy/kustomize/overlays/cert-manager
-	kubectl -n carbide-rest rollout status deployment/carbide-rest-cert-manager --timeout=240s
 
 	@echo "Setting up Carbide Mock Core (dev only, not in Helm chart)..."
 	kubectl apply -k deploy/kustomize/overlays/mock-core
